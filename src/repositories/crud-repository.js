@@ -1,5 +1,7 @@
 const { where } = require("sequelize");
 const { Logger } = require("../config");
+const AppError = require("../utils/errors/app-error");
+const { StatusCodes } = require("http-status-codes");
 
 class CrudRepository {
   constructor(model) {
@@ -11,7 +13,12 @@ class CrudRepository {
       const response = await this.model.create(data);
       return response;
     } catch (error) {
-      Logger.error("something went wrong in the crud repo:create");
+      if (error.name === "TypeError") {
+        throw new AppError(
+          "Cannot create a new Airplane object",
+          StatusCodes.INTERNAL_SERVER_ERROR
+        );
+      }
       throw error;
     }
   }
